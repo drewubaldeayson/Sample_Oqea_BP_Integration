@@ -2131,6 +2131,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   created: function created() {
     var _this = this;
@@ -2219,6 +2220,10 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   methods: {
+    resetForm: function resetForm() {
+      this.rawAppointment.reset();
+      this.rawAppointment.clear();
+    },
     getAppointments: function getAppointments() {
       var _this2 = this;
 
@@ -2231,6 +2236,36 @@ __webpack_require__.r(__webpack_exports__);
       })["catch"](function (errors) {
         console.log(errors);
       });
+    },
+    addAppointment: function addAppointment() {
+      console.log(this.rawAppointment.appointmentStartDateTime);
+      this.rawAppointment.post('/appointments').then(function (addAppointmentResult) {
+        $("#appointmentsModal").modal("hide");
+        toast.fire({
+          type: 'success',
+          icon: 'success',
+          title: addAppointmentResult.data.message.toString()
+        });
+      })["catch"](function (err) {
+        if (!err.message.toString().includes('422')) {
+          swal.fire('Error has occurred!', "Error in adding appointment", 'error');
+        }
+      });
+    },
+    getPatients: function getPatients() {
+      var _this3 = this;
+
+      axios.get("/patients").then(function (response) {
+        console.log("The data: ", response.data);
+        _this3.patients = response.data;
+      })["catch"](function (errors) {
+        console.log(errors);
+      });
+    },
+    openModal: function openModal() {
+      this.editMode = false;
+      this.resetForm();
+      $("#appointmentsModal").modal("show");
     },
     paginate: function paginate(array, length, pageNumber) {
       this.pagination.from = array.length ? (pageNumber - 1) * length + 1 : " ";
@@ -2253,53 +2288,18 @@ __webpack_require__.r(__webpack_exports__);
       return array.findIndex(function (i) {
         return i[key] == value;
       });
-    },
-    resetForm: function resetForm() {
-      this.rawAppointment.reset();
-      this.rawAppointment.clear();
-    },
-    addAppointment: function addAppointment() {
-      console.log(this.rawAppointment.appointmentStartDateTime);
-      this.rawAppointment.post('/appointments').then(function (addAppointmentResult) {
-        $("#appointmentsModal").modal("hide");
-        toast.fire({
-          type: 'success',
-          icon: 'success',
-          title: addAppointmentResult.data.message.toString()
-        });
-      })["catch"](function (err) {
-        if (!err.message.toString().includes('422')) {
-          swal.fire('Error has occurred!', "Error in adding appointment", 'error');
-        }
-      });
-    },
-    // getPatients(){
-    //     axios
-    //         .get("/patients")
-    //         .then(response => {
-    //             console.log("The data: ", response.data);
-    //             this.patients = response.data;
-    //         })
-    //         .catch(errors => {
-    //             console.log(errors);
-    //         });
-    // },
-    openModal: function openModal() {
-      this.editMode = false;
-      this.resetForm();
-      $("#appointmentsModal").modal("show");
     }
   },
   computed: {
     filteredUsers: function filteredUsers() {
-      var _this3 = this;
+      var _this4 = this;
 
       var appointments = this.appointments;
 
       if (this.search) {
         appointments = appointments.filter(function (row) {
           return Object.keys(row).some(function (key) {
-            return String(row[key]).toLowerCase().indexOf(_this3.search.toLowerCase()) > -1;
+            return String(row[key]).toLowerCase().indexOf(_this4.search.toLowerCase()) > -1;
           });
         });
       }
@@ -2309,14 +2309,14 @@ __webpack_require__.r(__webpack_exports__);
 
       if (sortKey) {
         appointments = appointments.slice().sort(function (a, b) {
-          var index = _this3.getIndex(_this3.columns, "name", sortKey);
+          var index = _this4.getIndex(_this4.columns, "name", sortKey);
 
           a = String(a[sortKey]).toLowerCase();
           b = String(b[sortKey]).toLowerCase();
 
-          if (_this3.columns[index].type && _this3.columns[index].type === "date") {
+          if (_this4.columns[index].type && _this4.columns[index].type === "date") {
             return (a === b ? 0 : new Date(a).getTime() > new Date(b).getTime() ? 1 : -1) * order;
-          } else if (_this3.columns[index].type && _this3.columns[index].type === "number") {
+          } else if (_this4.columns[index].type && _this4.columns[index].type === "number") {
             return (+a === +b ? 0 : +a > +b ? 1 : -1) * order;
           } else {
             return (a === b ? 0 : a > b ? 1 : -1) * order;
@@ -2513,6 +2513,91 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   created: function created() {
     var _this = this;
@@ -2569,6 +2654,18 @@ __webpack_require__.r(__webpack_exports__);
     });
     return {
       patients: [],
+      rawPatients: new Form({
+        titleCode: "",
+        firstname: "",
+        middlename: "",
+        lastname: "",
+        address: "",
+        city: "",
+        postcode: "",
+        dob: "",
+        sex: "",
+        email: ""
+      }),
       columns: columns,
       sortKey: "patient_name",
       sortOrders: sortOrders,
@@ -2600,6 +2697,30 @@ __webpack_require__.r(__webpack_exports__);
       })["catch"](function (errors) {
         console.log(errors);
       });
+    },
+    addPatient: function addPatient() {
+      console.log(this.rawPatients);
+      this.rawPatients.post('/patients').then(function (addPatientResult) {
+        $("#patientsModal").modal("hide");
+        toast.fire({
+          type: 'success',
+          icon: 'success',
+          title: addPatientResult.data.message.toString()
+        });
+      })["catch"](function (err) {
+        if (!err.message.toString().includes('422')) {
+          swal.fire('Error has occurred!', "Error in adding patient", 'error');
+        }
+      });
+    },
+    resetForm: function resetForm() {
+      this.rawPatients.reset();
+      this.rawPatients.clear();
+    },
+    openModal: function openModal() {
+      this.editMode = false;
+      this.resetForm();
+      $("#patientsModal").modal("show");
     },
     paginate: function paginate(array, length, pageNumber) {
       this.pagination.from = array.length ? (pageNumber - 1) * length + 1 : " ";
@@ -64487,7 +64608,7 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "usres-style" }, [
+  return _c("div", { staticClass: "users-style" }, [
     _c("div", { staticClass: "table-style" }, [
       _c("input", {
         directives: [
@@ -64516,6 +64637,21 @@ var render = function() {
           ]
         }
       }),
+      _vm._v(" "),
+      _c("div", { staticClass: "card-tools" }, [
+        _c(
+          "button",
+          {
+            staticClass: "btn btn-success",
+            on: {
+              click: function($event) {
+                return _vm.openModal()
+              }
+            }
+          },
+          [_c("i", { staticClass: "fa fa-plus" }), _vm._v(" Add Patient")]
+        )
+      ]),
       _vm._v(" "),
       _c("div", { staticClass: "control" }, [
         _c("div", { staticClass: "select" }, [
@@ -64748,10 +64884,577 @@ var render = function() {
                   [_vm._v("\n                Next\n            ")]
                 )
           ])
-    ])
+    ]),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        attrs: {
+          id: "patientsModal",
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "patientsModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c("div", { staticClass: "modal-dialog modal-dialog-centered" }, [
+          _c("div", { staticClass: "modal-content" }, [
+            _vm._m(0),
+            _vm._v(" "),
+            _c(
+              "form",
+              {
+                on: {
+                  submit: function($event) {
+                    $event.preventDefault()
+                    return _vm.addPatient()
+                  }
+                }
+              },
+              [
+                _c("div", { staticClass: "modal-body" }, [
+                  _c(
+                    "div",
+                    { staticClass: "form-group" },
+                    [
+                      _c(
+                        "select",
+                        {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.rawPatients.titleCode,
+                              expression: "rawPatients.titleCode"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          class: {
+                            "is-invalid": _vm.rawPatients.errors.has(
+                              "titleCode"
+                            )
+                          },
+                          attrs: { name: "titleCode", id: "titleCode" },
+                          on: {
+                            change: function($event) {
+                              var $$selectedVal = Array.prototype.filter
+                                .call($event.target.options, function(o) {
+                                  return o.selected
+                                })
+                                .map(function(o) {
+                                  var val = "_value" in o ? o._value : o.value
+                                  return val
+                                })
+                              _vm.$set(
+                                _vm.rawPatients,
+                                "titleCode",
+                                $event.target.multiple
+                                  ? $$selectedVal
+                                  : $$selectedVal[0]
+                              )
+                            }
+                          }
+                        },
+                        [
+                          _c(
+                            "option",
+                            {
+                              attrs: { value: "", disabled: "", selected: "" }
+                            },
+                            [_vm._v("Select Title")]
+                          ),
+                          _vm._v(" "),
+                          _c("option", { attrs: { value: "0" } }, [
+                            _vm._v("Mr")
+                          ]),
+                          _vm._v(" "),
+                          _c("option", { attrs: { value: "1" } }, [
+                            _vm._v("Ms")
+                          ])
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c("has-error", {
+                        attrs: { form: _vm.rawPatients, field: "titleCode" }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "form-group" },
+                    [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.rawPatients.firstname,
+                            expression: "rawPatients.firstname"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        class: {
+                          "is-invalid": _vm.rawPatients.errors.has("firstname")
+                        },
+                        attrs: {
+                          type: "text",
+                          name: "firstname",
+                          placeholder: "Enter First Name"
+                        },
+                        domProps: { value: _vm.rawPatients.firstname },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(
+                              _vm.rawPatients,
+                              "firstname",
+                              $event.target.value
+                            )
+                          }
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("has-error", {
+                        attrs: { form: _vm.rawPatients, field: "firstname" }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "form-group" },
+                    [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.rawPatients.middlename,
+                            expression: "rawPatients.middlename"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        class: {
+                          "is-invalid": _vm.rawPatients.errors.has("middlename")
+                        },
+                        attrs: {
+                          type: "text",
+                          name: "middlename",
+                          placeholder: "Enter Middle Name"
+                        },
+                        domProps: { value: _vm.rawPatients.middlename },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(
+                              _vm.rawPatients,
+                              "middlename",
+                              $event.target.value
+                            )
+                          }
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("has-error", {
+                        attrs: { form: _vm.rawPatients, field: "middlename" }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "form-group" },
+                    [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.rawPatients.lastname,
+                            expression: "rawPatients.lastname"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        class: {
+                          "is-invalid": _vm.rawPatients.errors.has("lastname")
+                        },
+                        attrs: {
+                          type: "text",
+                          name: "lastname",
+                          placeholder: "Enter Last Name"
+                        },
+                        domProps: { value: _vm.rawPatients.lastname },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(
+                              _vm.rawPatients,
+                              "lastname",
+                              $event.target.value
+                            )
+                          }
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("has-error", {
+                        attrs: { form: _vm.rawPatients, field: "lastname" }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "form-group" },
+                    [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.rawPatients.address,
+                            expression: "rawPatients.address"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        class: {
+                          "is-invalid": _vm.rawPatients.errors.has("address")
+                        },
+                        attrs: {
+                          type: "text",
+                          name: "address",
+                          placeholder: "Enter Address"
+                        },
+                        domProps: { value: _vm.rawPatients.address },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(
+                              _vm.rawPatients,
+                              "address",
+                              $event.target.value
+                            )
+                          }
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("has-error", {
+                        attrs: { form: _vm.rawPatients, field: "address" }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "form-group" },
+                    [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.rawPatients.city,
+                            expression: "rawPatients.city"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        class: {
+                          "is-invalid": _vm.rawPatients.errors.has("city")
+                        },
+                        attrs: {
+                          type: "text",
+                          name: "city",
+                          placeholder: "Enter City"
+                        },
+                        domProps: { value: _vm.rawPatients.city },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(
+                              _vm.rawPatients,
+                              "city",
+                              $event.target.value
+                            )
+                          }
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("has-error", {
+                        attrs: { form: _vm.rawPatients, field: "city" }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "form-group" },
+                    [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.rawPatients.postcode,
+                            expression: "rawPatients.postcode"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        class: {
+                          "is-invalid": _vm.rawPatients.errors.has("postcode")
+                        },
+                        attrs: {
+                          type: "text",
+                          name: "postcode",
+                          placeholder: "Enter Post Code"
+                        },
+                        domProps: { value: _vm.rawPatients.postcode },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(
+                              _vm.rawPatients,
+                              "postcode",
+                              $event.target.value
+                            )
+                          }
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("has-error", {
+                        attrs: { form: _vm.rawPatients, field: "postcode" }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "form-group" },
+                    [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.rawPatients.dob,
+                            expression: "rawPatients.dob"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        class: {
+                          "is-invalid": _vm.rawPatients.errors.has("dob")
+                        },
+                        attrs: {
+                          type: "datetime-local",
+                          name: "dob",
+                          placeholder: "Select Date of Birth"
+                        },
+                        domProps: { value: _vm.rawPatients.dob },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(
+                              _vm.rawPatients,
+                              "dob",
+                              $event.target.value
+                            )
+                          }
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("has-error", {
+                        attrs: { form: _vm.rawPatients, field: "dob" }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "form-group" },
+                    [
+                      _c(
+                        "select",
+                        {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.rawPatients.sex,
+                              expression: "rawPatients.sex"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          class: {
+                            "is-invalid": _vm.rawPatients.errors.has("sex")
+                          },
+                          attrs: { name: "sex", id: "sex" },
+                          on: {
+                            change: function($event) {
+                              var $$selectedVal = Array.prototype.filter
+                                .call($event.target.options, function(o) {
+                                  return o.selected
+                                })
+                                .map(function(o) {
+                                  var val = "_value" in o ? o._value : o.value
+                                  return val
+                                })
+                              _vm.$set(
+                                _vm.rawPatients,
+                                "sex",
+                                $event.target.multiple
+                                  ? $$selectedVal
+                                  : $$selectedVal[0]
+                              )
+                            }
+                          }
+                        },
+                        [
+                          _c(
+                            "option",
+                            {
+                              attrs: { value: "", disabled: "", selected: "" }
+                            },
+                            [_vm._v("Select Sex")]
+                          ),
+                          _vm._v(" "),
+                          _c("option", { attrs: { value: "1" } }, [
+                            _vm._v("Male")
+                          ]),
+                          _vm._v(" "),
+                          _c("option", { attrs: { value: "2" } }, [
+                            _vm._v("Female")
+                          ])
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c("has-error", {
+                        attrs: { form: _vm.rawPatients, field: "sex" }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "form-group" },
+                    [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.rawPatients.email,
+                            expression: "rawPatients.email"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        class: {
+                          "is-invalid": _vm.rawPatients.errors.has("email")
+                        },
+                        attrs: {
+                          type: "email",
+                          name: "email",
+                          placeholder: "Enter Email Address"
+                        },
+                        domProps: { value: _vm.rawPatients.email },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(
+                              _vm.rawPatients,
+                              "email",
+                              $event.target.value
+                            )
+                          }
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("has-error", {
+                        attrs: { form: _vm.rawPatients, field: "email" }
+                      })
+                    ],
+                    1
+                  )
+                ]),
+                _vm._v(" "),
+                _vm._m(1)
+              ]
+            )
+          ])
+        ])
+      ]
+    )
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "modal-header" }, [
+      _c("h5", { staticClass: "modal-title" }, [_vm._v("Add New Patient")]),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "close",
+          attrs: {
+            type: "button",
+            "data-dismiss": "modal",
+            "aria-label": "Close"
+          }
+        },
+        [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("×")])]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "modal-footer" }, [
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-danger",
+          attrs: { type: "button", "data-dismiss": "modal" }
+        },
+        [_vm._v("Close")]
+      ),
+      _vm._v(" "),
+      _c(
+        "button",
+        { staticClass: "btn btn-primary", attrs: { type: "submit" } },
+        [_vm._v("Add")]
+      )
+    ])
+  }
+]
 render._withStripped = true
 
 
