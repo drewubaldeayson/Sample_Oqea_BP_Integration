@@ -1,5 +1,6 @@
 <template>
-    <div class="usres-style">
+    <div class="users-style">
+        
         <div class="table-style">
             <input
                 class="input"
@@ -9,6 +10,9 @@
                 @input="resetPagination()"
                 style="width: 250px;"
             />
+            <div class="card-tools">
+                <button class="btn btn-success" @click="openModal()"><i class="fa fa-plus"></i> Add Patient</button>
+            </div>
             <div class="control">
                 <div class="select">
                     <select v-model="length" @change="resetPagination()">
@@ -18,6 +22,7 @@
                     </select>
                 </div>
             </div>
+           
         </div>
         <table class="table table-bordered table-responsive">
             <thead>
@@ -132,6 +137,86 @@
                 </a>
             </nav>
         </div>
+        <div class="modal fade" id="patientsModal" tabindex="-1" role="dialog" aria-labelledby="patientsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add New Patient</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+        
+                    <form @submit.prevent="addPatient()">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <select v-model="rawPatients.titleCode"  name="titleCode" id = "titleCode"
+                                    class="form-control" :class="{ 'is-invalid': rawPatients.errors.has('titleCode') }">
+                                    <option value="" disabled selected>Select Title</option>
+                                    <option value="0" >Mr</option>
+                                    <option value="1" >Ms</option>
+                                </select>
+                                <has-error :form="rawPatients" field="titleCode"></has-error>
+                            </div>
+                            <div class="form-group">
+                                <input  v-model="rawPatients.firstname" type="text" name="firstname" placeholder="Enter First Name"
+                                    class="form-control" :class="{ 'is-invalid': rawPatients.errors.has('firstname') }">
+                                <has-error :form="rawPatients" field="firstname"></has-error>
+                            </div>
+                            <div class="form-group">
+                                <input  v-model="rawPatients.middlename" type="text" name="middlename" placeholder="Enter Middle Name"
+                                    class="form-control" :class="{ 'is-invalid': rawPatients.errors.has('middlename') }">
+                                <has-error :form="rawPatients" field="middlename"></has-error>
+                            </div>
+                            <div class="form-group">
+                                <input  v-model="rawPatients.lastname" type="text" name="lastname" placeholder="Enter Last Name"
+                                    class="form-control" :class="{ 'is-invalid': rawPatients.errors.has('lastname') }">
+                                <has-error :form="rawPatients" field="lastname"></has-error>
+                            </div>
+                            <div class="form-group">
+                                <input  v-model="rawPatients.address" type="text" name="address" placeholder="Enter Address"
+                                    class="form-control" :class="{ 'is-invalid': rawPatients.errors.has('address') }">
+                                <has-error :form="rawPatients" field="address"></has-error>
+                            </div>
+                            <div class="form-group">
+                                <input  v-model="rawPatients.city" type="text" name="city" placeholder="Enter City"
+                                    class="form-control" :class="{ 'is-invalid': rawPatients.errors.has('city') }">
+                                <has-error :form="rawPatients" field="city"></has-error>
+                            </div>
+                             <div class="form-group">
+                                <input  v-model="rawPatients.postcode" type="text" name="postcode" placeholder="Enter Post Code"
+                                    class="form-control" :class="{ 'is-invalid': rawPatients.errors.has('postcode') }">
+                                <has-error :form="rawPatients" field="postcode"></has-error>
+                            </div>
+                            <div class="form-group">
+                                <input  v-model="rawPatients.dob" type="datetime-local" name="dob" placeholder="Select Date of Birth"
+                                    class="form-control" :class="{ 'is-invalid': rawPatients.errors.has('dob') }">
+                                <has-error :form="rawPatients" field="dob"></has-error>
+                            </div>
+                            <div class="form-group">
+                                <select v-model="rawPatients.sex"  name="sex" id = "sex"
+                                    class="form-control" :class="{ 'is-invalid': rawPatients.errors.has('sex') }">
+                                    <option value="" disabled selected>Select Sex</option>
+                                    <option value="1" >Male</option>
+                                    <option value="2" >Female</option>
+                                </select>
+                                <has-error :form="rawPatients" field="sex"></has-error>
+                            </div>
+                            <div class="form-group">
+                                <input  v-model="rawPatients.email" type="email" name="email" placeholder="Enter Email Address"
+                                    class="form-control" :class="{ 'is-invalid': rawPatients.errors.has('email') }">
+                                <has-error :form="rawPatients" field="email"></has-error>
+                            </div>
+                        </div>
+                    
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -167,6 +252,18 @@
 
             return {
                 patients: [],
+                rawPatients: new Form({
+                    titleCode: "",
+                    firstname: "",
+                    middlename: "",
+                    lastname: "",
+                    address: "",
+                    city: "",
+                    postcode: "",
+                    dob: "",
+                    sex: "",
+                    email: ""
+                }),
                 columns: columns,
                 sortKey: "patient_name",
                 sortOrders: sortOrders,
@@ -197,6 +294,34 @@
                     .catch(errors => {
                         console.log(errors);
                     });
+            },
+            addPatient(){
+                console.log(this.rawPatients)
+                this.rawPatients.post('/patients').then((addPatientResult)=>{
+                    $("#patientsModal").modal("hide")
+                    toast.fire({
+                        type:'success',
+                        icon:'success',
+                        title:addPatientResult.data.message.toString()
+                    })
+                }).catch((err)=>{
+                    if(!err.message.toString().includes('422')){
+                        swal.fire(
+                            'Error has occurred!',
+                            "Error in adding patient",
+                            'error'
+                        )
+                    }
+                })
+            },
+            resetForm(){
+                this.rawPatients.reset();
+                this.rawPatients.clear();
+            },
+            openModal(){
+                this.editMode = false;
+                this.resetForm();
+                $("#patientsModal").modal("show")
             },
             paginate(array, length, pageNumber) {
                 this.pagination.from = array.length
