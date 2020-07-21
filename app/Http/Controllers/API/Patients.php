@@ -114,4 +114,25 @@ class Patients extends Controller
         return ['data' => $appointments];
     }
 
+    public function addRawPatient(Request $request)
+    {
+        $titleCode = $request['titleCode'];
+        $firstname = $request['firstname'];
+        $middlename = $request['middlename'];
+        $lastname = $request['lastname'];
+        $address = $request['address'];
+        $city = $request['city'];
+        $postcode = $request['postcode'];
+        $dob = date_format(date_create($request['dob']),"Y-m-d H:i:s");
+        $sex = $request['sex'];
+        $email = $request['email'];
+
+        DB::connection('bps_mssql')
+        ->update('EXEC BP_AddPatient ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?',
+        array($titleCode,$firstname,$middlename,$lastname,$firstname,$address,'',$city,$postcode,'','','',$dob,$sex,
+        '','','','','','','','','','','','','',$email,'','','',''));
+
+        return ['message' => "Patient Added Successfully"];
+    }
+
 }
