@@ -58,6 +58,7 @@
                     <td>{{ appointment.bookedby }}</td>
                     <td>{{ appointment.comment }}</td>
                     <td>{{ appointment.itemlist }}</td>
+                    
                 </tr>
             </tbody>
         </table>
@@ -268,6 +269,10 @@
             };
         },
         methods: {
+            resetForm(){
+                this.rawAppointment.reset();
+                this.rawAppointment.clear();
+            },
             getAppointments() {
                 axios
                     .get("/appointments/", { params: this.tableShow })
@@ -279,6 +284,41 @@
                     .catch(errors => {
                         console.log(errors);
                     });
+            },
+            addAppointment(){
+                console.log(this.rawAppointment.appointmentStartDateTime)
+                this.rawAppointment.post('/appointments').then((addAppointmentResult)=>{
+                    $("#appointmentsModal").modal("hide")
+                    toast.fire({
+                        type:'success',
+                        icon:'success',
+                        title:addAppointmentResult.data.message.toString()
+                    })
+                }).catch((err)=>{
+                    if(!err.message.toString().includes('422')){
+                        swal.fire(
+                            'Error has occurred!',
+                            "Error in adding appointment",
+                            'error'
+                        )
+                    }
+                })
+            },
+            getPatients(){
+                axios
+                    .get("/patients")
+                    .then(response => {
+                        console.log("The data: ", response.data);
+                        this.patients = response.data;
+                    })
+                    .catch(errors => {
+                        console.log(errors);
+                    });
+            },
+            openModal(){
+                this.editMode = false;
+                this.resetForm();
+                $("#appointmentsModal").modal("show")
             },
             paginate(array, length, pageNumber) {
                 this.pagination.from = array.length
@@ -305,46 +345,7 @@
             },
             getIndex(array, key, value) {
                 return array.findIndex(i => i[key] == value);
-            },
-            resetForm(){
-                this.rawAppointment.reset();
-                this.rawAppointment.clear();
-            },
-            addAppointment(){
-                console.log(this.rawAppointment.appointmentStartDateTime)
-                this.rawAppointment.post('/appointments').then((addAppointmentResult)=>{
-                    $("#appointmentsModal").modal("hide")
-                    toast.fire({
-                        type:'success',
-                        icon:'success',
-                        title:addAppointmentResult.data.message.toString()
-                    })
-                }).catch((err)=>{
-                    if(!err.message.toString().includes('422')){
-                        swal.fire(
-                            'Error has occurred!',
-                            "Error in adding appointment",
-                            'error'
-                        )
-                    }
-                })
-            },
-            // getPatients(){
-            //     axios
-            //         .get("/patients")
-            //         .then(response => {
-            //             console.log("The data: ", response.data);
-            //             this.patients = response.data;
-            //         })
-            //         .catch(errors => {
-            //             console.log(errors);
-            //         });
-            // },
-            openModal(){
-                this.editMode = false;
-                this.resetForm();
-                $("#appointmentsModal").modal("show")
-            },
+            }
         },
         computed: {
             filteredUsers() {
