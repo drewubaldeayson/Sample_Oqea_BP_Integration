@@ -24,3 +24,4 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/appointments', 'API\Appointments@getAppointments');
 Route::post('/appointments', 'API\Appointments@addRawAppointment');
 Route::get('/patients', 'API\Patients@getPatients');
+Route::post('/patients', 'API\Patients@addRawPatient');
