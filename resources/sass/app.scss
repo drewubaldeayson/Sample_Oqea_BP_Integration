@@ -1,0 +1,64 @@
+// Fonts
+@import url('https://fonts.googleapis.com/css?family=Nunito');
+
+// Variables
+@import 'variables';
+
+// Bootstrap
+@import '~bootstrap/scss/bootstrap';
+@import '~admin-lte/dist/css/adminlte.css';
+@import "~@fortawesome/fontawesome-free/scss/fontawesome.scss";
+@import "~@fortawesome/fontawesome-free/scss/solid.scss";
+@import "~@fortawesome/fontawesome-free/scss/brands.scss";
+
+.users-style {
+    width: 100%;
+    margin: auto;
+    margin-top: 20px;
+    .table-style {
+        margin-bottom: 10px;
+        input {
+            width: 175px;
+        }
+        .control {
+            float: right;
+        }
+    }
+    .table {
+        width: 100%;
+        .sorting {
+            background-image: url("/images/sort_both.png");
+            background-repeat: no-repeat;
+            background-position: center right;
+        }
+        .sorting_asc {
+            background-image: url("/images/sort_asc.png");
+            background-repeat: no-repeat;
+            background-position: center right;
+        }
+        .sorting_desc {
+            background-image: url("/images/sort_desc.png");
+            background-repeat: no-repeat;
+            background-position: center right;
+        }
+    }
+    nav a {
+        color: white !important;
+        margin-right: 10px;
+    }
+}
+h1 {
+    text-align: center;
+    font-size: 30px;
+}
+.pagination {
+    justify-content: flex-end !important;
+    .page-stats {
+        align-items: center;
+        margin-right: 5px;
+    }
+    i {
+        color: #3273dc !important;
+    }
+}
+
