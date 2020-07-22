@@ -64041,20 +64041,22 @@ var render = function() {
                   ])
                 ]),
             _vm._v(" "),
-            _c("td", [
-              _c(
-                "a",
-                {
-                  attrs: { href: "#" },
-                  on: {
-                    click: function($event) {
-                      return _vm.cancelAppointment(appointment.recordid)
-                    }
-                  }
-                },
-                [_c("i", { staticClass: "fa fa-stop-circle text-red" })]
-              )
-            ])
+            appointment.record_status == 1
+              ? _c("td", [
+                  _c(
+                    "a",
+                    {
+                      attrs: { href: "#" },
+                      on: {
+                        click: function($event) {
+                          return _vm.cancelAppointment(appointment.recordid)
+                        }
+                      }
+                    },
+                    [_c("i", { staticClass: "fa fa-stop-circle text-red" })]
+                  )
+                ])
+              : _vm._e()
           ])
         }),
         0
