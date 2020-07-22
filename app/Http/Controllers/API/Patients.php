@@ -67,6 +67,7 @@ class Patients extends Controller
     {
         $query = DB::table('patients')->select(
             'id',
+            'internal_id',
             'patient_name', 
             'address',
             'dob',
@@ -79,7 +80,8 @@ class Patients extends Controller
             'medicare_no',
             'pension_no',
             'religion',
-            'usual_doctor'
+            'usual_doctor',
+            'record_status'
         );
 
         if ( $request->input('showdata') ) {
@@ -110,8 +112,8 @@ class Patients extends Controller
             });
         }
 
-        $appointments = $query->paginate($length);
-        return ['data' => $appointments];
+        $patients = $query->paginate($length);
+        return ['data' => $patients];
     }
 
     public function addRawPatient(Request $request)
@@ -133,6 +135,26 @@ class Patients extends Controller
         '','','','','','','','','','','','','',$email,'','','',''));
 
         return ['message' => "Patient Added Successfully"];
+    }
+
+    public function getPatientList(Request $request)
+    {
+        $query = DB::table('patients')->select(
+            'id',
+            'internal_id',
+            'patient_name'
+        )->get();
+        return ['data' => $query];
+    }
+
+    public function removeRawPatient(Request $request)
+    {
+        $patientId = $request['internal_id'];
+
+        DB::connection('bps_mssql')
+        ->update('EXEC BP_DeletePatient ?',array($patientId));
+
+        return ['message' => "Patient Deleted Successfully"];
     }
 
 }

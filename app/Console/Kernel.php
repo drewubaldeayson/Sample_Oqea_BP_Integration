@@ -35,13 +35,12 @@ class Kernel extends ConsoleKernel
             ->join('Users', 'Appointments.UserID', '=', 'Users.UserID')
             ->join('Users AS Booking', DB::raw('ABS(Appointments.CreatedBy)'), '=', 'Booking.UserID')
             ->join('Titles', 'Users.TitleCode', '=', 'Titles.TitleCode')
-            ->where('Appointments.RecordStatus', '=', '1')
-            ->select('Patients.Firstname as Patient')
             ->select(
                 DB::raw('LTrim(Rtrim(Patients.Firstname) + \' \' + Rtrim(Patients.Surname)) AS patient'),'Appointments.InternalID as internalid','Appointments.AppointmentDate as appointmentdate',
             'Appointments.AppointmentTime as appointmenttime','Appointments.AppointmentLength as appointmentlength',DB::raw('LTrim(Rtrim(Titles.Title) + \' \' + Rtrim(Users.Firstname) + \' \' + Rtrim(Users.Surname)) AS provider'),
             'YesNo.YesNoword AS urgent','AppointmentTypes.Description AS appointmenttype','AppointmentCodes.Description AS status','Appointments.ArrivalTime as arrivaltime',
-            'Appointments.ConsultationTime as consultationtime',DB::raw('LTrim(Rtrim(Booking.Firstname) + \' \' + Rtrim(Booking.Surname)) AS bookedby'),'Appointments.COMMENT as comment','Appointments.ITEMLIST as itemlist')
+            'Appointments.ConsultationTime as consultationtime',DB::raw('LTrim(Rtrim(Booking.Firstname) + \' \' + Rtrim(Booking.Surname)) AS bookedby'),'Appointments.COMMENT as comment','Appointments.ITEMLIST as itemlist',
+            'Appointments.RecordId as recordid','Appointments.RecordStatus as recordstatus')
             ->get();
             
             var_dump("Appointment records have been fetched");
@@ -52,8 +51,9 @@ class Kernel extends ConsoleKernel
                 $appointmentStartTime = trim(date("h:i:s",$appointment->appointmenttime));
                 $appointmentLength = intval(trim($appointment->appointmentlength))/60;
                 $appointmentEndTime = trim(date("h:i:s",strtotime('+'.$appointmentLength.' minutes',strtotime(trim(date("h:i:s",$appointment->appointmenttime))))));
-   
+                // var_dump("YES".$appointment->recordid);
                 DB::connection('mysql')->table("appointments")->insertOrIgnore([
+                    'recordid' => trim($appointment->recordid),
                     'patient' => trim($appointment->patient),
                     'internalid' => trim($appointment->internalid), 
                     'appointmentstartdatetime' => $appointmentDate.' '.$appointmentStartTime, 
@@ -67,16 +67,31 @@ class Kernel extends ConsoleKernel
                     'consultationtime' => date("h:i:s",strtotime(trim(date("h:i:s",$appointment->consultationtime)))),
                     'bookedby' => trim($appointment->bookedby),
                     'comment' => trim($appointment->comment),
-                    'itemlist' => trim($appointment->itemlist)
+                    'itemlist' => trim($appointment->itemlist),
+                    'record_status' => trim($appointment->recordstatus)
                 ]);
             }
 
             var_dump("Successfully inserted the appointment records");
 
             $patients = DB::connection('bps_mssql')
-            ->table("BPS_Patients")
-            ->select('internalid','title','firstname','middlename','surname','address1','city','postcode','dob','sex','ethnicity',
-                     'homephone','workphone','mobilephone','email','medicareno','pensionno','religion','usualdoctor')
+            ->table("Patients")
+            ->join('Titles', 'Patients.TitleCode', '=', 'Titles.TitleCode')
+            ->join('Sex', 'Patients.SexCode', '=', 'Sex.SexCode')
+            ->join('PensionType', 'Patients.PensionCode', '=', 'PensionType.PensionCode')
+            ->join('Ethnicity', 'Patients.EthnicCode', '=', 'Ethnicity.EthnicCode')
+            ->join('PatientStatus', 'Patients.PatientStatus', '=', 'PatientStatus.StatusCode')
+            ->join('Users', 'Patients.UserID', '=', 'Users.UserID')
+            ->join('Titles as UserTitles', 'Users.TitleCode', '=', 'UserTitles.TitleCode')
+            ->join('Email', 'Patients.InternalID', '=', 'Email.InternalID','left outer')
+            ->where('Patients.FirstName','!=','\'\'')
+            ->select('Patients.InternalID as internalid','Patients.ExternalID as externalid','Titles.Title as title',
+            'Patients.Firstname as firstname', 'Patients.Middlename as middlename', 'Patients.Surname as surname',
+            'Patients.Address1 as address1','Patients.City as city', 'Patients.Postcode as postcode',
+            'Patients.DOB as dob','Sex.Sex as sex','Ethnicity.EthnicType AS ethnicity','Patients.HomePhone as homephone',
+            'Patients.WorkPhone as workphone','Patients.MobilePhone as mobilephone','Email.Email as email',
+            'Patients.MedicareNo as medicareno','Patients.PensionNo as pensionno','Patients.Religion as religion','Patients.Recordstatus as record_status',
+            DB::raw('LTrim(Rtrim(UserTitles.Title) + \' \' + Rtrim(Users.Firstname) + \' \' + Rtrim(Users.Surname)) AS usualdoctor'))
             ->get();
 
             var_dump("Patient records have been fetched");
@@ -84,6 +99,7 @@ class Kernel extends ConsoleKernel
             foreach($patients as $patient)
             {
                 DB::connection('mysql')->table("patients")->insertOrIgnore([
+                    'internal_id' => trim($patient->internalid),
                     'patient_name' => trim($patient->title).' '.trim($patient->firstname).' '.trim($patient->middlename).' '.trim($patient->surname),
                     'address' => trim($patient->address1).' '.trim($patient->city).' '.trim($patient->postcode), 
                     'dob' => trim($patient->dob), 
@@ -96,7 +112,8 @@ class Kernel extends ConsoleKernel
                     'medicare_no' => trim($patient->medicareno),
                     'pension_no' => trim($patient->pensionno),
                     'religion' => trim($patient->religion),
-                    'usual_doctor' => trim($patient->usualdoctor)
+                    'usual_doctor' => trim($patient->usualdoctor),
+                    'record_status' => trim($patient->record_status),
                 ]);
             }
 

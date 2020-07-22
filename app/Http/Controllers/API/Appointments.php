@@ -68,6 +68,7 @@ class Appointments extends Controller
     {
         $query = DB::table('appointments')->select(
             'id',
+            'recordid',
             'patient', 
             'internalid',
             'appointmentstartdatetime',
@@ -81,7 +82,8 @@ class Appointments extends Controller
             'consultationtime',
             'bookedby',
             'comment',
-            'itemlist'
+            'itemlist',
+            'record_status'
         );
         
         if ( $request->input('showdata') ) {
@@ -109,7 +111,8 @@ class Appointments extends Controller
                 ->orWhere('consultationtime', 'like', '%' . $search_input . '%')
                 ->orWhere('comment', 'like', '%' . $search_input . '%')
                 ->orWhere('itemlist', 'like', '%' . $search_input . '%')
-                ->orWhere('bookedby', 'like', '%' . $search_input . '%');
+                ->orWhere('bookedby', 'like', '%' . $search_input . '%')
+                ->orWhere('record_status', 'like', '%' . $search_input . '%');
             });
         }
 
@@ -136,6 +139,20 @@ class Appointments extends Controller
         array($appointmentStartDate,$parsedStartTime,$appointmentLength,$request['practitionerId'],$request['patientId'],
               $request['loginId'],$request['locationId']));
         return ['message' => "Appointment Added Successfully"];
+    }
+
+    public function cancelAppointment(Request $request)
+    {
+        $appointmentId = $request['appointmentId'];
+        $loginId = $request['loginId'];
+
+        DB::connection('bps_mssql')
+        ->update('EXEC BP_CancelAppointment ?,?',
+        array($appointmentId,$loginId));
+
+
+        return ['message' =>'Appointment is Cancelled Successfully'];
+
     }
 
 }
