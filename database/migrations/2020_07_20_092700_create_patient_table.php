@@ -15,19 +15,21 @@ class CreatePatientTable extends Migration
     {
         Schema::create('patients', function (Blueprint $table) {
             $table->id();
-            $table->string('patient_name',100);
-            $table->string('address',100);
-            $table->string('dob',100);
-            $table->string('sex',100);
-            $table->string('ethnicity',100);
-            $table->string('home_phone',100);
-            $table->string('work_phone',100);
-            $table->string('mobile_phone',100);
-            $table->string('email',100);
-            $table->string('medicare_no',100);
-            $table->string('pension_no',100);
-            $table->string('religion',100);
-            $table->string('usual_doctor',100);
+            $table->integer('internal_id')->nullable();
+            $table->string('patient_name',100)->nullable();
+            $table->string('address',100)->nullable();
+            $table->string('dob',100)->nullable();
+            $table->string('sex',100)->nullable();
+            $table->string('ethnicity',100)->nullable();
+            $table->string('home_phone',100)->nullable();
+            $table->string('work_phone',100)->nullable();
+            $table->string('mobile_phone',100)->nullable();
+            $table->string('email',100)->nullable();
+            $table->string('medicare_no',100)->nullable();
+            $table->string('pension_no',100)->nullable();
+            $table->string('religion',100)->nullable();
+            $table->string('usual_doctor',100)->nullable();
+            $table->string('record_status',100)->nullable();
         });
     }
 
