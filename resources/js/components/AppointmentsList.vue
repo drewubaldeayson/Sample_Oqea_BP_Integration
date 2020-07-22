@@ -58,7 +58,14 @@
                     <td>{{ appointment.bookedby }}</td>
                     <td>{{ appointment.comment }}</td>
                     <td>{{ appointment.itemlist }}</td>
-                    
+                    <td v-if="appointment.record_status == 1"><span class="right badge badge-success">Active</span></td>
+                    <td v-else-if="appointment.record_status == 2"><span class="right badge badge-warning">Cancelled</span></td>
+                    <td v-else><span class="right badge badge-danger">Deleted</span></td>
+                    <td>
+                        <a href="#" @click="cancelAppointment(appointment.recordid)">
+                            <i class="fa fa-stop-circle text-red"></i>
+                        </a>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -170,9 +177,10 @@
                                 <select v-model="rawAppointment.patientId" name="patientId" id = "patientId"
                                     class="form-control" :class="{ 'is-invalid': rawAppointment.errors.has('patientId') }">
                                     <option value="" disabled selected>Select Patient</option>
-                                    <option value="1" >Anastasia Abbott</option>
+                                    <option v-for="patient in patients" v-bind:value="patient.internal_id" :key="patient.internal_id">{{patient.patient_name}}</option>
+                                    <!-- <option value="1" >Anastasia Abbott</option>
                                     <option value="2" >Allan Abbott</option>
-                                    <option value="6" >Alfred Charles Aldridge</option>
+                                    <option value="6" >Alfred Charles Aldridge</option> -->
                                 </select>
                                 <has-error :form="rawAppointment" field="patientId"></has-error>
                             </div>
@@ -212,7 +220,7 @@
             Fire.$on("reloadAppointments", () => {
                 this.getAppointments();
             });
-            // this.getPatients();
+            this.getPatients();
         },
         data() {
             let sortOrders = {};
@@ -231,6 +239,8 @@
                 { label: "Booked By", name: "bookedby" },
                 { label: "Comment", name: "comment" },
                 { label: "Item List", name: "itemlist" },
+                { label: "Status", name: "record_status" },
+                { label: "Cancel Appointment" }
             ];
 
             columns.forEach(column => {
@@ -247,8 +257,10 @@
                     practitionerId:"",
                     patientId:"",
                     loginId:"",
-                    locationId:""
+                    locationId:"",
+                    appointmentId: ""
                 }),
+                
                 patients: [],
                 columns: columns,
                 sortKey: "appointmentstartdatetime",
@@ -287,7 +299,7 @@
             },
             addAppointment(){
                 console.log(this.rawAppointment.appointmentStartDateTime)
-                this.rawAppointment.post('/appointments').then((addAppointmentResult)=>{
+                this.rawAppointment.post('/appointments/new').then((addAppointmentResult)=>{
                     $("#appointmentsModal").modal("hide")
                     toast.fire({
                         type:'success',
@@ -304,12 +316,41 @@
                     }
                 })
             },
+            cancelAppointment(appointment_id){
+                swal.fire({
+                    title: 'Are you sure you want to cancel the appointment?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes!'
+                }).then((result) => {
+                    if (result.value) {
+                        this.rawAppointment.appointmentId=appointment_id;
+                        this.rawAppointment.loginId=3;
+                        this.rawAppointment.post('/appointments/cancel').then((formUpdateResult)=>{
+                            toast.fire({
+                                icon:'success',
+                                type:'success',
+                                title:formUpdateResult.data.message.toString(),
+                            })
+                        }).catch((formDeleteErr)=> {
+                            swal.fire(
+                                'Error has occurred!',
+                                'Unable to cancel this appointment',
+                                'error'
+                            )
+                        })
+                    }
+                })
+            },
             getPatients(){
                 axios
-                    .get("/patients")
+                    .get("/patients/list")
                     .then(response => {
-                        console.log("The data: ", response.data);
-                        this.patients = response.data;
+                        this.patients = response.data.data;
+                        console.log("The data: ", this.patients);
                     })
                     .catch(errors => {
                         console.log(errors);
