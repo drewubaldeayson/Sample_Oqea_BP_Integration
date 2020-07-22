@@ -51,9 +51,9 @@ class Kernel extends ConsoleKernel
                 $appointmentStartTime = trim(date("h:i:s",$appointment->appointmenttime));
                 $appointmentLength = intval(trim($appointment->appointmentlength))/60;
                 $appointmentEndTime = trim(date("h:i:s",strtotime('+'.$appointmentLength.' minutes',strtotime(trim(date("h:i:s",$appointment->appointmenttime))))));
-                // var_dump("YES".$appointment->recordid);
-                DB::connection('mysql')->table("appointments")->insertOrIgnore([
-                    'recordid' => trim($appointment->recordid),
+     
+                DB::connection('mysql')->table("appointments")->updateOrInsert([
+                    'recordid' => trim($appointment->recordid)],[
                     'patient' => trim($appointment->patient),
                     'internalid' => trim($appointment->internalid), 
                     'appointmentstartdatetime' => $appointmentDate.' '.$appointmentStartTime, 
@@ -70,6 +70,7 @@ class Kernel extends ConsoleKernel
                     'itemlist' => trim($appointment->itemlist),
                     'record_status' => trim($appointment->recordstatus)
                 ]);
+               
             }
 
             var_dump("Successfully inserted the appointment records");
@@ -98,8 +99,8 @@ class Kernel extends ConsoleKernel
 
             foreach($patients as $patient)
             {
-                DB::connection('mysql')->table("patients")->insertOrIgnore([
-                    'internal_id' => trim($patient->internalid),
+                DB::connection('mysql')->table("patients")->updateOrInsert([
+                    'internal_id' => trim($patient->internalid)],[
                     'patient_name' => trim($patient->title).' '.trim($patient->firstname).' '.trim($patient->middlename).' '.trim($patient->surname),
                     'address' => trim($patient->address1).' '.trim($patient->city).' '.trim($patient->postcode), 
                     'dob' => trim($patient->dob), 
