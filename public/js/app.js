@@ -2132,6 +2132,14 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   created: function created() {
     var _this = this;
@@ -2139,7 +2147,8 @@ __webpack_require__.r(__webpack_exports__);
     this.getAppointments();
     Fire.$on("reloadAppointments", function () {
       _this.getAppointments();
-    }); // this.getPatients();
+    });
+    this.getPatients();
   },
   data: function data() {
     var sortOrders = {};
@@ -2185,6 +2194,11 @@ __webpack_require__.r(__webpack_exports__);
     }, {
       label: "Item List",
       name: "itemlist"
+    }, {
+      label: "Status",
+      name: "record_status"
+    }, {
+      label: "Cancel Appointment"
     }];
     columns.forEach(function (column) {
       sortOrders[column.name] = -1;
@@ -2198,7 +2212,8 @@ __webpack_require__.r(__webpack_exports__);
         practitionerId: "",
         patientId: "",
         loginId: "",
-        locationId: ""
+        locationId: "",
+        appointmentId: ""
       }),
       patients: [],
       columns: columns,
@@ -2239,7 +2254,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     addAppointment: function addAppointment() {
       console.log(this.rawAppointment.appointmentStartDateTime);
-      this.rawAppointment.post('/appointments').then(function (addAppointmentResult) {
+      this.rawAppointment.post('/appointments/new').then(function (addAppointmentResult) {
         $("#appointmentsModal").modal("hide");
         toast.fire({
           type: 'success',
@@ -2252,12 +2267,40 @@ __webpack_require__.r(__webpack_exports__);
         }
       });
     },
-    getPatients: function getPatients() {
+    cancelAppointment: function cancelAppointment(appointment_id) {
       var _this3 = this;
 
-      axios.get("/patients").then(function (response) {
-        console.log("The data: ", response.data);
-        _this3.patients = response.data;
+      swal.fire({
+        title: 'Are you sure you want to cancel the appointment?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes!'
+      }).then(function (result) {
+        if (result.value) {
+          _this3.rawAppointment.appointmentId = appointment_id;
+          _this3.rawAppointment.loginId = 3;
+
+          _this3.rawAppointment.post('/appointments/cancel').then(function (formUpdateResult) {
+            toast.fire({
+              icon: 'success',
+              type: 'success',
+              title: formUpdateResult.data.message.toString()
+            });
+          })["catch"](function (formDeleteErr) {
+            swal.fire('Error has occurred!', 'Unable to cancel this appointment', 'error');
+          });
+        }
+      });
+    },
+    getPatients: function getPatients() {
+      var _this4 = this;
+
+      axios.get("/patients/list").then(function (response) {
+        _this4.patients = response.data.data;
+        console.log("The data: ", _this4.patients);
       })["catch"](function (errors) {
         console.log(errors);
       });
@@ -2292,14 +2335,14 @@ __webpack_require__.r(__webpack_exports__);
   },
   computed: {
     filteredUsers: function filteredUsers() {
-      var _this4 = this;
+      var _this5 = this;
 
       var appointments = this.appointments;
 
       if (this.search) {
         appointments = appointments.filter(function (row) {
           return Object.keys(row).some(function (key) {
-            return String(row[key]).toLowerCase().indexOf(_this4.search.toLowerCase()) > -1;
+            return String(row[key]).toLowerCase().indexOf(_this5.search.toLowerCase()) > -1;
           });
         });
       }
@@ -2309,14 +2352,14 @@ __webpack_require__.r(__webpack_exports__);
 
       if (sortKey) {
         appointments = appointments.slice().sort(function (a, b) {
-          var index = _this4.getIndex(_this4.columns, "name", sortKey);
+          var index = _this5.getIndex(_this5.columns, "name", sortKey);
 
           a = String(a[sortKey]).toLowerCase();
           b = String(b[sortKey]).toLowerCase();
 
-          if (_this4.columns[index].type && _this4.columns[index].type === "date") {
+          if (_this5.columns[index].type && _this5.columns[index].type === "date") {
             return (a === b ? 0 : new Date(a).getTime() > new Date(b).getTime() ? 1 : -1) * order;
-          } else if (_this4.columns[index].type && _this4.columns[index].type === "number") {
+          } else if (_this5.columns[index].type && _this5.columns[index].type === "number") {
             return (+a === +b ? 0 : +a > +b ? 1 : -1) * order;
           } else {
             return (a === b ? 0 : a > b ? 1 : -1) * order;
@@ -2598,6 +2641,13 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   created: function created() {
     var _this = this;
@@ -2648,6 +2698,8 @@ __webpack_require__.r(__webpack_exports__);
     }, {
       label: "Usual Doctor",
       name: "usual_doctor"
+    }, {
+      label: "Actions"
     }];
     columns.forEach(function (column) {
       sortOrders[column.name] = -1;
@@ -2664,7 +2716,8 @@ __webpack_require__.r(__webpack_exports__);
         postcode: "",
         dob: "",
         sex: "",
-        email: ""
+        email: "",
+        internal_id: ""
       }),
       columns: columns,
       sortKey: "patient_name",
@@ -2713,6 +2766,33 @@ __webpack_require__.r(__webpack_exports__);
         }
       });
     },
+    deletePatient: function deletePatient(internal_id) {
+      var _this3 = this;
+
+      swal.fire({
+        title: 'Are you sure you want to delete this patient?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes!'
+      }).then(function (result) {
+        if (result.value) {
+          _this3.rawPatients.internal_id = internal_id;
+
+          _this3.rawPatients.post('/patients/remove').then(function (formDeleteResult) {
+            toast.fire({
+              icon: 'success',
+              type: 'success',
+              title: formDeleteResult.data.message.toString()
+            });
+          })["catch"](function (formDeleteErr) {
+            swal.fire('Error has occurred!', 'Unable to delete this patient', 'error');
+          });
+        }
+      });
+    },
     resetForm: function resetForm() {
       this.rawPatients.reset();
       this.rawPatients.clear();
@@ -2747,14 +2827,14 @@ __webpack_require__.r(__webpack_exports__);
   },
   computed: {
     filteredUsers: function filteredUsers() {
-      var _this3 = this;
+      var _this4 = this;
 
       var patients = this.patients;
 
       if (this.search) {
         patients = patients.filter(function (row) {
           return Object.keys(row).some(function (key) {
-            return String(row[key]).toLowerCase().indexOf(_this3.search.toLowerCase()) > -1;
+            return String(row[key]).toLowerCase().indexOf(_this4.search.toLowerCase()) > -1;
           });
         });
       }
@@ -2764,14 +2844,14 @@ __webpack_require__.r(__webpack_exports__);
 
       if (sortKey) {
         patients = patients.slice().sort(function (a, b) {
-          var index = _this3.getIndex(_this3.columns, "name", sortKey);
+          var index = _this4.getIndex(_this4.columns, "name", sortKey);
 
           a = String(a[sortKey]).toLowerCase();
           b = String(b[sortKey]).toLowerCase();
 
-          if (_this3.columns[index].type && _this3.columns[index].type === "date") {
+          if (_this4.columns[index].type && _this4.columns[index].type === "date") {
             return (a === b ? 0 : new Date(a).getTime() > new Date(b).getTime() ? 1 : -1) * order;
-          } else if (_this3.columns[index].type && _this3.columns[index].type === "number") {
+          } else if (_this4.columns[index].type && _this4.columns[index].type === "number") {
             return (+a === +b ? 0 : +a > +b ? 1 : -1) * order;
           } else {
             return (a === b ? 0 : a > b ? 1 : -1) * order;
@@ -63941,7 +64021,40 @@ var render = function() {
             _vm._v(" "),
             _c("td", [_vm._v(_vm._s(appointment.comment))]),
             _vm._v(" "),
-            _c("td", [_vm._v(_vm._s(appointment.itemlist))])
+            _c("td", [_vm._v(_vm._s(appointment.itemlist))]),
+            _vm._v(" "),
+            appointment.record_status == 1
+              ? _c("td", [
+                  _c("span", { staticClass: "right badge badge-success" }, [
+                    _vm._v("Active")
+                  ])
+                ])
+              : appointment.record_status == 2
+              ? _c("td", [
+                  _c("span", { staticClass: "right badge badge-warning" }, [
+                    _vm._v("Cancelled")
+                  ])
+                ])
+              : _c("td", [
+                  _c("span", { staticClass: "right badge badge-danger" }, [
+                    _vm._v("Deleted")
+                  ])
+                ]),
+            _vm._v(" "),
+            _c("td", [
+              _c(
+                "a",
+                {
+                  attrs: { href: "#" },
+                  on: {
+                    click: function($event) {
+                      return _vm.cancelAppointment(appointment.recordid)
+                    }
+                  }
+                },
+                [_c("i", { staticClass: "fa fa-stop-circle text-red" })]
+              )
+            ])
           ])
         }),
         0
@@ -64336,18 +64449,18 @@ var render = function() {
                             [_vm._v("Select Patient")]
                           ),
                           _vm._v(" "),
-                          _c("option", { attrs: { value: "1" } }, [
-                            _vm._v("Anastasia Abbott")
-                          ]),
-                          _vm._v(" "),
-                          _c("option", { attrs: { value: "2" } }, [
-                            _vm._v("Allan Abbott")
-                          ]),
-                          _vm._v(" "),
-                          _c("option", { attrs: { value: "6" } }, [
-                            _vm._v("Alfred Charles Aldridge")
-                          ])
-                        ]
+                          _vm._l(_vm.patients, function(patient) {
+                            return _c(
+                              "option",
+                              {
+                                key: patient.internal_id,
+                                domProps: { value: patient.internal_id }
+                              },
+                              [_vm._v(_vm._s(patient.patient_name))]
+                            )
+                          })
+                        ],
+                        2
                       ),
                       _vm._v(" "),
                       _c("has-error", {
@@ -64762,7 +64875,36 @@ var render = function() {
             _vm._v(" "),
             _c("td", [_vm._v(_vm._s(patient.religion))]),
             _vm._v(" "),
-            _c("td", [_vm._v(_vm._s(patient.usual_doctor))])
+            _c("td", [_vm._v(_vm._s(patient.usual_doctor))]),
+            _vm._v(" "),
+            patient.record_status == 1
+              ? _c("td", [
+                  _c("span", { staticClass: "right badge badge-success" }, [
+                    _vm._v("Active")
+                  ])
+                ])
+              : _c("td", [
+                  _c("span", { staticClass: "right badge badge-danger" }, [
+                    _vm._v("Deleted")
+                  ])
+                ]),
+            _vm._v(" "),
+            patient.record_status != 0
+              ? _c("td", [
+                  _c(
+                    "a",
+                    {
+                      attrs: { href: "#" },
+                      on: {
+                        click: function($event) {
+                          return _vm.deletePatient(patient.internal_id)
+                        }
+                      }
+                    },
+                    [_c("i", { staticClass: "fa fa-stop-circle text-red" })]
+                  )
+                ])
+              : _vm._e()
           ])
         }),
         0
