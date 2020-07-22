@@ -28,8 +28,8 @@ class CreateAppointmentTable extends Migration
             $table->string('arrivaltime',100)->nullable();
             $table->string('consultationtime',100)->nullable();
             $table->string('bookedby',100)->nullable();
-            $table->string('comment',100)->nullable();
-            $table->string('itemlist',100)->nullable();
+            $table->text('comment')->nullable();
+            $table->text('itemlist')->nullable();
             $table->string('record_status',100)->nullable();
         });
     }
