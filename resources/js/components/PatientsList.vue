@@ -59,6 +59,13 @@
                     <td>{{ patient.pension_no }}</td>
                     <td>{{ patient.religion }}</td>
                     <td>{{ patient.usual_doctor }}</td>
+                    <td v-if="patient.record_status == 1"><span class="right badge badge-success">Active</span></td>
+                    <td v-else><span class="right badge badge-danger">Deleted</span></td>
+                    <td v-if="patient.record_status != 0">
+                        <a href="#" @click="deletePatient(patient.internal_id)">
+                            <i class="fa fa-stop-circle text-red"></i>
+                        </a>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -244,6 +251,7 @@
                 { label: "Pension No.", name: "pension_no" },
                 { label: "Religion", name: "religion" },
                 { label: "Usual Doctor", name: "usual_doctor" },
+                { label: "Actions" },
             ];
 
             columns.forEach(column => {
@@ -262,7 +270,8 @@
                     postcode: "",
                     dob: "",
                     sex: "",
-                    email: ""
+                    email: "",
+                    internal_id: ""
                 }),
                 columns: columns,
                 sortKey: "patient_name",
@@ -311,6 +320,34 @@
                             "Error in adding patient",
                             'error'
                         )
+                    }
+                })
+            },
+            deletePatient(internal_id){
+                swal.fire({
+                    title: 'Are you sure you want to delete this patient?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes!'
+                }).then((result) => {
+                    if (result.value) {
+                        this.rawPatients.internal_id=internal_id;
+                        this.rawPatients.post('/patients/remove').then((formDeleteResult)=>{
+                            toast.fire({
+                                icon:'success',
+                                type:'success',
+                                title:formDeleteResult.data.message.toString(),
+                            })
+                        }).catch((formDeleteErr)=> {
+                            swal.fire(
+                                'Error has occurred!',
+                                'Unable to delete this patient',
+                                'error'
+                            )
+                        })
                     }
                 })
             },
