@@ -61,7 +61,7 @@
                     <td v-if="appointment.record_status == 1"><span class="right badge badge-success">Active</span></td>
                     <td v-else-if="appointment.record_status == 2"><span class="right badge badge-warning">Cancelled</span></td>
                     <td v-else><span class="right badge badge-danger">Deleted</span></td>
-                    <td>
+                    <td v-if="appointment.record_status == 1">
                         <a href="#" @click="cancelAppointment(appointment.recordid)">
                             <i class="fa fa-stop-circle text-red"></i>
                         </a>
