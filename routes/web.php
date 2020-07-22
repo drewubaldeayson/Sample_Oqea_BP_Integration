@@ -22,6 +22,9 @@ Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('/appointments', 'API\Appointments@getAppointments');
-Route::post('/appointments', 'API\Appointments@addRawAppointment');
+Route::post('/appointments/new', 'API\Appointments@addRawAppointment');
+Route::get('/patients/list','API\Patients@getPatientList');
+Route::post('/appointments/cancel','API\Appointments@cancelAppointment');
 Route::get('/patients', 'API\Patients@getPatients');
 Route::post('/patients', 'API\Patients@addRawPatient');
+Route::post('/patients/remove', 'API\Patients@removeRawPatient');
