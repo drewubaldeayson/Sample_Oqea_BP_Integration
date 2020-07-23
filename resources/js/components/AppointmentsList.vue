@@ -169,7 +169,7 @@
                                 <select v-model="rawAppointment.practitionerId" name="practitionerId" id = "practitionerId"
                                     class="form-control" :class="{ 'is-invalid': rawAppointment.errors.has('practitionerId') }">
                                     <option value="" disabled selected>Select Practitioner</option>
-                                    <option value="3" >Dr. Ivor Cure</option>
+                                    <option v-for="provider in providers" v-bind:value="provider.id" :key="provider.id">{{provider.name}}</option>
                                 </select>
                                 <has-error :form="rawAppointment" field="practitionerId"></has-error>
                             </div>
@@ -183,14 +183,6 @@
                                     <option value="6" >Alfred Charles Aldridge</option> -->
                                 </select>
                                 <has-error :form="rawAppointment" field="patientId"></has-error>
-                            </div>
-                            <div class="form-group">
-                                <select v-model="rawAppointment.loginId" name="loginId" id = "loginId"
-                                    class="form-control" :class="{ 'is-invalid': rawAppointment.errors.has('loginId') }">
-                                    <option value="" disabled selected>Select Login</option>
-                                    <option value="3" >Dr. Ivor Cure</option>
-                                </select>
-                                <has-error :form="rawAppointment" field="loginId"></has-error>
                             </div>
                              <div class="form-group">
                                 <select v-model="rawAppointment.locationId" name="locationId" id = "locationId"
@@ -221,6 +213,7 @@
                 this.getAppointments();
             });
             this.getPatients();
+            this.getProviders();
         },
         data() {
             let sortOrders = {};
@@ -256,11 +249,10 @@
                     appointmentEndDateTime: "",
                     practitionerId:"",
                     patientId:"",
-                    loginId:"",
                     locationId:"",
                     appointmentId: ""
                 }),
-                
+                providers: [],
                 patients: [],
                 columns: columns,
                 sortKey: "appointmentstartdatetime",
@@ -351,6 +343,17 @@
                     .then(response => {
                         this.patients = response.data.data;
                         console.log("The data: ", this.patients);
+                    })
+                    .catch(errors => {
+                        console.log(errors);
+                    });
+            },
+            getProviders(){
+                axios
+                    .get("/providers")
+                    .then(response => {
+                        this.providers = response.data.data;
+                        console.log("The data: ", this.providers);
                     })
                     .catch(errors => {
                         console.log(errors);
