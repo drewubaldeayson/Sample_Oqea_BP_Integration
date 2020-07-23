@@ -84,6 +84,7 @@ class Kernel extends ConsoleKernel
             ->join('PatientStatus', 'Patients.PatientStatus', '=', 'PatientStatus.StatusCode')
             ->join('Users', 'Patients.UserID', '=', 'Users.UserID')
             ->join('Titles as UserTitles', 'Users.TitleCode', '=', 'UserTitles.TitleCode')
+            ->join('NextOfKin', 'Patients.nextofkinid', '=', 'NEXTOFKIN.nextofkinid')
             ->join('Email', 'Patients.InternalID', '=', 'Email.InternalID','left outer')
             ->where('Patients.FirstName','!=','\'\'')
             ->select('Patients.InternalID as internalid','Patients.ExternalID as externalid','Titles.Title as title',
@@ -92,16 +93,19 @@ class Kernel extends ConsoleKernel
             'Patients.DOB as dob','Sex.Sex as sex','Ethnicity.EthnicType AS ethnicity','Patients.HomePhone as homephone',
             'Patients.WorkPhone as workphone','Patients.MobilePhone as mobilephone','Email.Email as email',
             'Patients.MedicareNo as medicareno','Patients.PensionNo as pensionno','Patients.Religion as religion','Patients.Recordstatus as record_status',
-            DB::raw('LTrim(Rtrim(UserTitles.Title) + \' \' + Rtrim(Users.Firstname) + \' \' + Rtrim(Users.Surname)) AS usualdoctor'))
+            'Patients.IHI as ihi','Patients.MedicareExpiry as medicareexpiry','Patients.countryofbirth as birthcountry','Patients.healthfundname as healthfund',
+            'Patients.healthfundno as healthfundmembershipno','Patients.dvano','Patients.pensionno','Patients.pensionexpiry',
+            DB::raw('CONCAT(trim(NEXTOFKIN.FIRSTNAME),\' \',trim(NEXTOFKIN.SURNAME)) as nextkin'))
             ->get();
 
             var_dump("Patient records have been fetched");
 
             foreach($patients as $patient)
             {
+
                 DB::connection('mysql')->table("patients")->updateOrInsert([
                     'internal_id' => trim($patient->internalid)],[
-                    'patient_name' => trim($patient->title).' '.trim($patient->firstname).' '.trim($patient->middlename).' '.trim($patient->surname),
+                    'patient_name' => trim($patient->firstname).' '.trim($patient->middlename).' '.trim($patient->surname),
                     'address' => trim($patient->address1).' '.trim($patient->city).' '.trim($patient->postcode), 
                     'dob' => trim($patient->dob), 
                     'sex' => trim($patient->sex),
@@ -110,15 +114,89 @@ class Kernel extends ConsoleKernel
                     'work_phone' => trim($patient->workphone), 
                     'mobile_phone' => trim($patient->mobilephone),
                     'email' => trim($patient->email),
-                    'medicare_no' => trim($patient->medicareno),
-                    'pension_no' => trim($patient->pensionno),
-                    'religion' => trim($patient->religion),
-                    'usual_doctor' => trim($patient->usualdoctor),
                     'record_status' => trim($patient->record_status),
                 ]);
+
+               $patientId = DB::getPDO()->lastInsertId();
+
+               if($patientId!=0){
+                    DB::connection('mysql')->table("patient_info")->updateOrInsert([
+                        'patient_id' => $patientId,
+                        'ihi' => trim($patient->ihi),
+                        'medicare' => trim($patient->medicareno),
+                        'medicare_expiry' => trim($patient->medicareexpiry),
+                        //'marital_status' => trim($patient->maritalstatus),
+                        'religion' => trim($patient->religion),
+                        'birth_country' => trim($patient->birthcountry),
+                        // 'employment' => trim($patient->employment),
+                        // 'occupation' => trim($patient->occupation),
+                        'name_prefix' => trim($patient->title),
+                        'health_fund' => trim($patient->healthfund),
+                        'health_fund_membership_no' => trim($patient->healthfundmembershipno),
+                        'dva_card_no' => trim($patient->dvano),
+                        // 'dva_card_expiry' => trim($patient->dvacardexpiry),
+                        // 'dva_card_type' => trim($patient->dvacardtype),
+                        'pension_no' => trim($patient->pensionno),
+                        // 'pension_type' => trim($patient->pensiontype),
+                        'pension_expiry' => trim(str_replace(" 00:00:00.000","",$patient->pensionexpiry)),
+                        'next_kin' => trim($patient->nextkin),
+                        'account_responsible' => '1'
+                    ]);
+               }
+               
             }
 
             var_dump("Successfully inserted the patient records");
+
+
+
+            // $users = DB::connection('bps_mssql')
+            // ->table("Users")
+            // ->where('userstatus','=','1')
+            // ->select('userid','userstatus','firstname','surname')
+            // ->get();
+            
+            // var_dump("Patient records have been fetched");
+
+            // foreach($users as $user)
+            // {
+
+            //     DB::connection('mysql')->table("users")->updateOrInsert([
+            //         'userid' => trim($patient->internalid)],[
+            //         'firstname' => trim($patient->firstname),
+            //         'surname' => trim($patient->lastname)
+            //     ]);
+
+            //     $patientId = DB::getPDO()->lastInsertId();
+
+            //     if($patientId!=0){
+            //             DB::connection('mysql')->table("p")->updateOrInsert([
+            //                 'patient_id' => $patientId,
+            //                 'ihi' => trim($patient->ihi),
+            //                 'medicare' => trim($patient->medicareno),
+            //                 'medicare_expiry' => trim($patient->medicareexpiry),
+            //                 //'marital_status' => trim($patient->maritalstatus),
+            //                 'religion' => trim($patient->religion),
+            //                 'birth_country' => trim($patient->birthcountry),
+            //                 // 'employment' => trim($patient->employment),
+            //                 // 'occupation' => trim($patient->occupation),
+            //                 'name_prefix' => trim($patient->title),
+            //                 'health_fund' => trim($patient->healthfund),
+            //                 'health_fund_membership_no' => trim($patient->healthfundmembershipno),
+            //                 'dva_card_no' => trim($patient->dvano),
+            //                 // 'dva_card_expiry' => trim($patient->dvacardexpiry),
+            //                 // 'dva_card_type' => trim($patient->dvacardtype),
+            //                 'pension_no' => trim($patient->pensionno),
+            //                 // 'pension_type' => trim($patient->pensiontype),
+            //                 'pension_expiry' => trim(str_replace(" 00:00:00.000","",$patient->pensionexpiry)),
+            //                 'next_kin' => trim($patient->nextkin),
+            //                 'account_responsible' => '1'
+            //             ]);
+            //     }
+               
+            // }
+
+            // var_dump("Successfully inserted the patient records");
 
         })->everyMinute();
     }
