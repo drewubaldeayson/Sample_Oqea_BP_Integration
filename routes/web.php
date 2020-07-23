@@ -28,3 +28,4 @@ Route::post('/appointments/cancel','API\Appointments@cancelAppointment');
 Route::get('/patients', 'API\Patients@getPatients');
 Route::post('/patients', 'API\Patients@addRawPatient');
 Route::post('/patients/remove', 'API\Patients@removeRawPatient');
+Route::get('/providers','API\Providers@getProviders');
