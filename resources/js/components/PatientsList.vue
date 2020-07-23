@@ -51,14 +51,27 @@
                     <td>{{ patient.dob }}</td>
                     <td>{{ patient.sex }}</td>
                     <td>{{ patient.ethnicity }}</td>
+                    <td>{{ patient.marital_status }}</td>
+                    <td>{{ patient.religion }}</td>
+                    <td>{{ patient.birth_country }}</td>
+                    <td>{{ patient.employment }}</td>
+                    <td>{{ patient.occupation }}</td>
                     <td>{{ patient.home_phone }}</td>
                     <td>{{ patient.work_phone }}</td>
                     <td>{{ patient.mobile_phone }}</td>
                     <td>{{ patient.email }}</td>
-                    <td>{{ patient.medicare_no }}</td>
+                    <td>{{ patient.medicare }}</td>
+                    <td>{{ patient.medicare_expiry }}</td>
+                    <td>{{ patient.health_fund }}</td>
+                    <td>{{ patient.health_fund_membership_no }}</td>
+                    <td>{{ patient.dva_card_no }}</td>
+                    <td>{{ patient.dva_card_expiry }}</td>
+                    <td>{{ patient.dva_card_type }}</td>
                     <td>{{ patient.pension_no }}</td>
-                    <td>{{ patient.religion }}</td>
-                    <td>{{ patient.usual_doctor }}</td>
+                    <td>{{ patient.pension_type }}</td>
+                    <td>{{ patient.pension_expiry }}</td>
+                    <td>{{ patient.ihi }}</td>
+                    <td>{{ patient.next_kin }}</td>
                     <td v-if="patient.record_status == 1"><span class="right badge badge-success">Active</span></td>
                     <td v-else><span class="right badge badge-danger">Deleted</span></td>
                     <td v-if="patient.record_status != 0">
@@ -243,14 +256,27 @@
                 { label: "Date of Birth", name: "dob" },
                 { label: "Sex", name: "sex" },
                 { label: "Ethnicity", name: "ethnicity" },
+                { label: "Marital Status", name: "marital_status" },
+                { label: "Religion", name: "religion" },
+                { label: "Birth Country", name: "birth_country" },
+                { label: "Employment", name: "employment" },
+                { label: "Occupation", name: "occupation" },
                 { label: "Home Phone No.", name: "home_phone" },
                 { label: "Work Phone No.", name: "work_phone" },
                 { label: "Mobile Phone No.", name: "mobile_phone" },
                 { label: "Email", name: "email" },
-                { label: "Medicare No.", name: "medicare_no" },
+                { label: "Medicare No.", name: "medicare" },
+                { label: "Medicare Expiry", name: "medicare_expiry" },
+                { label: "Health Fund", name: "health_fund" },
+                { label: "Health Fund Membership No.", name: "health_fund_membership_no" },
+                { label: "DVA Card No.", name: "dva_card_no" },
+                { label: "DVA Card Expiry", name: "dva_card_expiry" },
+                { label: "DVA Card Type", name: "dva_card_type" },
                 { label: "Pension No.", name: "pension_no" },
-                { label: "Religion", name: "religion" },
-                { label: "Usual Doctor", name: "usual_doctor" },
+                { label: "Pension Type", name: "pension_type" },
+                { label: "Pension Expiry", name: "pension_expiry" },
+                { label: "Ihi", name: "ihi" },
+                { label: "Next Kin", name: "next_kin" },
                 { label: "Actions" },
             ];
 
