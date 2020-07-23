@@ -137,7 +137,7 @@ class Appointments extends Controller
         DB::connection('bps_mssql')
         ->update('EXEC BP_AddAppointment ?,?,?,?,?,?,?',
         array($appointmentStartDate,$parsedStartTime,$appointmentLength,$request['practitionerId'],$request['patientId'],
-              $request['loginId'],$request['locationId']));
+              $request['practitionerId'],$request['locationId']));
         return ['message' => "Appointment Added Successfully"];
     }
 
