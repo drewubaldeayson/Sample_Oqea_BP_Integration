@@ -2132,14 +2132,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
 /* harmony default export */ __webpack_exports__["default"] = ({
   created: function created() {
     var _this = this;
@@ -2149,6 +2141,7 @@ __webpack_require__.r(__webpack_exports__);
       _this.getAppointments();
     });
     this.getPatients();
+    this.getProviders();
   },
   data: function data() {
     var sortOrders = {};
@@ -2211,10 +2204,10 @@ __webpack_require__.r(__webpack_exports__);
         appointmentEndDateTime: "",
         practitionerId: "",
         patientId: "",
-        loginId: "",
         locationId: "",
         appointmentId: ""
       }),
+      providers: [],
       patients: [],
       columns: columns,
       sortKey: "appointmentstartdatetime",
@@ -2305,6 +2298,16 @@ __webpack_require__.r(__webpack_exports__);
         console.log(errors);
       });
     },
+    getProviders: function getProviders() {
+      var _this5 = this;
+
+      axios.get("/providers").then(function (response) {
+        _this5.providers = response.data.data;
+        console.log("The data: ", _this5.providers);
+      })["catch"](function (errors) {
+        console.log(errors);
+      });
+    },
     openModal: function openModal() {
       this.editMode = false;
       this.resetForm();
@@ -2335,14 +2338,14 @@ __webpack_require__.r(__webpack_exports__);
   },
   computed: {
     filteredUsers: function filteredUsers() {
-      var _this5 = this;
+      var _this6 = this;
 
       var appointments = this.appointments;
 
       if (this.search) {
         appointments = appointments.filter(function (row) {
           return Object.keys(row).some(function (key) {
-            return String(row[key]).toLowerCase().indexOf(_this5.search.toLowerCase()) > -1;
+            return String(row[key]).toLowerCase().indexOf(_this6.search.toLowerCase()) > -1;
           });
         });
       }
@@ -2352,14 +2355,14 @@ __webpack_require__.r(__webpack_exports__);
 
       if (sortKey) {
         appointments = appointments.slice().sort(function (a, b) {
-          var index = _this5.getIndex(_this5.columns, "name", sortKey);
+          var index = _this6.getIndex(_this6.columns, "name", sortKey);
 
           a = String(a[sortKey]).toLowerCase();
           b = String(b[sortKey]).toLowerCase();
 
-          if (_this5.columns[index].type && _this5.columns[index].type === "date") {
+          if (_this6.columns[index].type && _this6.columns[index].type === "date") {
             return (a === b ? 0 : new Date(a).getTime() > new Date(b).getTime() ? 1 : -1) * order;
-          } else if (_this5.columns[index].type && _this5.columns[index].type === "number") {
+          } else if (_this6.columns[index].type && _this6.columns[index].type === "number") {
             return (+a === +b ? 0 : +a > +b ? 1 : -1) * order;
           } else {
             return (a === b ? 0 : a > b ? 1 : -1) * order;
@@ -2648,6 +2651,19 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   created: function created() {
     var _this = this;
@@ -2675,6 +2691,21 @@ __webpack_require__.r(__webpack_exports__);
       label: "Ethnicity",
       name: "ethnicity"
     }, {
+      label: "Marital Status",
+      name: "marital_status"
+    }, {
+      label: "Religion",
+      name: "religion"
+    }, {
+      label: "Birth Country",
+      name: "birth_country"
+    }, {
+      label: "Employment",
+      name: "employment"
+    }, {
+      label: "Occupation",
+      name: "occupation"
+    }, {
       label: "Home Phone No.",
       name: "home_phone"
     }, {
@@ -2688,16 +2719,40 @@ __webpack_require__.r(__webpack_exports__);
       name: "email"
     }, {
       label: "Medicare No.",
-      name: "medicare_no"
+      name: "medicare"
+    }, {
+      label: "Medicare Expiry",
+      name: "medicare_expiry"
+    }, {
+      label: "Health Fund",
+      name: "health_fund"
+    }, {
+      label: "Health Fund Membership No.",
+      name: "health_fund_membership_no"
+    }, {
+      label: "DVA Card No.",
+      name: "dva_card_no"
+    }, {
+      label: "DVA Card Expiry",
+      name: "dva_card_expiry"
+    }, {
+      label: "DVA Card Type",
+      name: "dva_card_type"
     }, {
       label: "Pension No.",
       name: "pension_no"
     }, {
-      label: "Religion",
-      name: "religion"
+      label: "Pension Type",
+      name: "pension_type"
     }, {
-      label: "Usual Doctor",
-      name: "usual_doctor"
+      label: "Pension Expiry",
+      name: "pension_expiry"
+    }, {
+      label: "Ihi",
+      name: "ihi"
+    }, {
+      label: "Next Kin",
+      name: "next_kin"
     }, {
       label: "Actions"
     }];
@@ -64384,10 +64439,18 @@ var render = function() {
                             [_vm._v("Select Practitioner")]
                           ),
                           _vm._v(" "),
-                          _c("option", { attrs: { value: "3" } }, [
-                            _vm._v("Dr. Ivor Cure")
-                          ])
-                        ]
+                          _vm._l(_vm.providers, function(provider) {
+                            return _c(
+                              "option",
+                              {
+                                key: provider.id,
+                                domProps: { value: provider.id }
+                              },
+                              [_vm._v(_vm._s(provider.name))]
+                            )
+                          })
+                        ],
+                        2
                       ),
                       _vm._v(" "),
                       _c("has-error", {
@@ -64467,70 +64530,6 @@ var render = function() {
                       _vm._v(" "),
                       _c("has-error", {
                         attrs: { form: _vm.rawAppointment, field: "patientId" }
-                      })
-                    ],
-                    1
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    { staticClass: "form-group" },
-                    [
-                      _c(
-                        "select",
-                        {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.rawAppointment.loginId,
-                              expression: "rawAppointment.loginId"
-                            }
-                          ],
-                          staticClass: "form-control",
-                          class: {
-                            "is-invalid": _vm.rawAppointment.errors.has(
-                              "loginId"
-                            )
-                          },
-                          attrs: { name: "loginId", id: "loginId" },
-                          on: {
-                            change: function($event) {
-                              var $$selectedVal = Array.prototype.filter
-                                .call($event.target.options, function(o) {
-                                  return o.selected
-                                })
-                                .map(function(o) {
-                                  var val = "_value" in o ? o._value : o.value
-                                  return val
-                                })
-                              _vm.$set(
-                                _vm.rawAppointment,
-                                "loginId",
-                                $event.target.multiple
-                                  ? $$selectedVal
-                                  : $$selectedVal[0]
-                              )
-                            }
-                          }
-                        },
-                        [
-                          _c(
-                            "option",
-                            {
-                              attrs: { value: "", disabled: "", selected: "" }
-                            },
-                            [_vm._v("Select Login")]
-                          ),
-                          _vm._v(" "),
-                          _c("option", { attrs: { value: "3" } }, [
-                            _vm._v("Dr. Ivor Cure")
-                          ])
-                        ]
-                      ),
-                      _vm._v(" "),
-                      _c("has-error", {
-                        attrs: { form: _vm.rawAppointment, field: "loginId" }
                       })
                     ],
                     1
@@ -64863,6 +64862,16 @@ var render = function() {
             _vm._v(" "),
             _c("td", [_vm._v(_vm._s(patient.ethnicity))]),
             _vm._v(" "),
+            _c("td", [_vm._v(_vm._s(patient.marital_status))]),
+            _vm._v(" "),
+            _c("td", [_vm._v(_vm._s(patient.religion))]),
+            _vm._v(" "),
+            _c("td", [_vm._v(_vm._s(patient.birth_country))]),
+            _vm._v(" "),
+            _c("td", [_vm._v(_vm._s(patient.employment))]),
+            _vm._v(" "),
+            _c("td", [_vm._v(_vm._s(patient.occupation))]),
+            _vm._v(" "),
             _c("td", [_vm._v(_vm._s(patient.home_phone))]),
             _vm._v(" "),
             _c("td", [_vm._v(_vm._s(patient.work_phone))]),
@@ -64871,13 +64880,29 @@ var render = function() {
             _vm._v(" "),
             _c("td", [_vm._v(_vm._s(patient.email))]),
             _vm._v(" "),
-            _c("td", [_vm._v(_vm._s(patient.medicare_no))]),
+            _c("td", [_vm._v(_vm._s(patient.medicare))]),
+            _vm._v(" "),
+            _c("td", [_vm._v(_vm._s(patient.medicare_expiry))]),
+            _vm._v(" "),
+            _c("td", [_vm._v(_vm._s(patient.health_fund))]),
+            _vm._v(" "),
+            _c("td", [_vm._v(_vm._s(patient.health_fund_membership_no))]),
+            _vm._v(" "),
+            _c("td", [_vm._v(_vm._s(patient.dva_card_no))]),
+            _vm._v(" "),
+            _c("td", [_vm._v(_vm._s(patient.dva_card_expiry))]),
+            _vm._v(" "),
+            _c("td", [_vm._v(_vm._s(patient.dva_card_type))]),
             _vm._v(" "),
             _c("td", [_vm._v(_vm._s(patient.pension_no))]),
             _vm._v(" "),
-            _c("td", [_vm._v(_vm._s(patient.religion))]),
+            _c("td", [_vm._v(_vm._s(patient.pension_type))]),
             _vm._v(" "),
-            _c("td", [_vm._v(_vm._s(patient.usual_doctor))]),
+            _c("td", [_vm._v(_vm._s(patient.pension_expiry))]),
+            _vm._v(" "),
+            _c("td", [_vm._v(_vm._s(patient.ihi))]),
+            _vm._v(" "),
+            _c("td", [_vm._v(_vm._s(patient.next_kin))]),
             _vm._v(" "),
             patient.record_status == 1
               ? _c("td", [
