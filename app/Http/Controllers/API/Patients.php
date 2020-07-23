@@ -65,23 +65,39 @@ class Patients extends Controller
 
     public function getPatients(Request $request)
     {
-        $query = DB::table('patients')->select(
-            'id',
-            'internal_id',
-            'patient_name', 
-            'address',
-            'dob',
-            'sex',
-            'ethnicity',
-            'home_phone',
-            'work_phone',
-            'mobile_phone',
-            'email',
-            'medicare_no',
-            'pension_no',
-            'religion',
-            'usual_doctor',
-            'record_status'
+        $query = DB::table('patients')
+        ->join("patient_info","patient_info.patient_id","=","patients.id")
+        ->select(
+            'patients.id',
+            'patients.internal_id',
+            DB::raw('CONCAT(patient_info.name_prefix,\' \',patients.patient_name) as patient_name'), 
+            'patients.address',
+            'patients.dob',
+            'patients.sex',
+            'patients.ethnicity',
+            'patients.home_phone',
+            'patients.work_phone',
+            'patients.mobile_phone',
+            'patients.email',
+            'patients.record_status',
+            'patient_info.ihi',
+            'patient_info.medicare',
+            'patient_info.medicare_expiry',
+            'patient_info.marital_status',
+            'patient_info.religion',
+            'patient_info.birth_country',
+            'patient_info.employment',
+            'patient_info.occupation',
+            'patient_info.name_prefix',
+            'patient_info.health_fund',
+            'patient_info.health_fund_membership_no',
+            'patient_info.dva_card_no',
+            'patient_info.dva_card_expiry',
+            'patient_info.dva_card_type',
+            'patient_info.pension_no',
+            'patient_info.pension_type',
+            'patient_info.pension_expiry',
+            'patient_info.next_kin'
         );
 
         if ( $request->input('showdata') ) {
@@ -139,7 +155,9 @@ class Patients extends Controller
 
     public function getPatientList(Request $request)
     {
-        $query = DB::table('patients')->select(
+        $query = DB::table('patients')
+        ->where('record_status','=','1')
+        ->select(
             'id',
             'internal_id',
             'patient_name'
