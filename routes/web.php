@@ -19,6 +19,8 @@ Route::get('/', function () {
 
 Auth::routes();
 
+Route::get('/providers/{email}/check','API\Providers@checkEmail')->name('checkEmail');
+
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('/appointments', 'API\Appointments@getAppointments');
