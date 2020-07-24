@@ -29,6 +29,7 @@ Vue.component(AlertError.name, AlertError)
 Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 Vue.component('appointments-list', require('./components/AppointmentsList.vue').default);
 Vue.component('patients-list', require('./components/PatientsList.vue').default);
+Vue.component('provider-instance', require('./components/ProviderInstance.vue').default);
 
 
 const toast = swal.mixin({
