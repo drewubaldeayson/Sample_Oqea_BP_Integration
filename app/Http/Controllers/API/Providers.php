@@ -68,9 +68,24 @@ class Providers extends Controller
         $query = DB::table('users')
         ->select(
             'id',
-            'name'
+            DB::raw('CONCAT(first_name,\' \',last_name) as name')
         )->get();
         return ['data' => $query];
+    }
+
+    public function checkEmail(Request $request)
+    {
+        $email = $request->email;
+        $hasRecord = false;
+
+        $users = DB::connection('bps_mssql')
+        ->table("Users")
+        ->where('userstatus','=','1')
+        ->where('email','=',$email)
+        ->select('userstatus',DB::raw('trim(firstname) as firstname'),'surname as lastname','mobilephone')
+        ->get();
+
+        return $users;
     }
 
 }
