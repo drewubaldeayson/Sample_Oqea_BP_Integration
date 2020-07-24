@@ -50,9 +50,17 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'firstname' => ['required', 'string', 'max:255'],
+            'lastname' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:40', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'birth_date' => ['required'],
+            'gender' => ['required'],
+            'mobile_phone' => ['string', 'max:22'],
+            'address' => ['string', 'max:255'],
+            'suburb' => ['string', 'max:100'],
+            'state' => ['string', 'max:100'],
+            'country' => ['required', 'string', 'max:3']
         ]);
     }
 
@@ -62,12 +70,23 @@ class RegisterController extends Controller
      * @param  array  $data
      * @return \App\User
      */
+
     protected function create(array $data)
     {
         return User::create([
-            'name' => $data['name'],
+            'first_name' => $data['firstname'],
+            'last_name' => $data['lastname'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'birth_date' => date_create($data['birth_date']),
+            'gender' => $data['gender'],
+            'mobile_phone' => $data['mobile_phone'],
+            'address' => $data['address'],
+            'suburb' => $data['suburb'],
+            'state' => $data['state'],
+            'country' => $data['country'],
+            'ip_address' => '127.0.0.1'
+
         ]);
     }
 }
